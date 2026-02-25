@@ -9,14 +9,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
-  // ✅ Logged user
-  const user = JSON.parse(
-    localStorage.getItem("loggedUser") || "{}"
-  );
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const user = JSON.parse(localStorage.getItem("loggedUser") || "{}");
 
-  // ✅ Appointments
   const [upcomingReminder, setUpcomingReminder] = useState<string | null>(null);
 
+  // ✅ Protect Dashboard (No direct access without login)
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, [isLoggedIn, navigate]);
+
+  // ✅ Appointment Reminder Logic
   useEffect(() => {
     const appointments = JSON.parse(
       localStorage.getItem("appointments") || "[]"
@@ -27,20 +32,30 @@ const Dashboard: React.FC = () => {
     appointments.forEach((appointment: any) => {
       const appointmentDate = new Date(appointment.date);
 
-      const diffTime =
-        appointmentDate.getTime() - today.getTime();
+      const diffTime = appointmentDate.getTime() - today.getTime();
+      const diffDays = diffTime / (1000 * 3600 * 24);
 
-      const diffDays =
-        diffTime / (1000 * 3600 * 24);
-
-      // ✅ If appointment is tomorrow
       if (diffDays <= 1 && diffDays > 0) {
         setUpcomingReminder(
           `🔔 Reminder: Your appointment is tomorrow at ${appointment.time}`
         );
+
+        // ✅ Simulated Email Notification
+        console.log(
+          `Email Sent To ${user?.email}: Your appointment is tomorrow at ${appointment.time}`
+        );
       }
     });
-  }, []);
+  }, [user]);
+
+  // ✅ Protect Appointment Button
+  const handleAppointmentClick = () => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    } else {
+      navigate("/appointment");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -52,13 +67,12 @@ const Dashboard: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-
-          {/* ✅ USER NAME */}
+          {/* USER NAME */}
           <h1 className="text-3xl font-bold mb-4">
             Welcome, {user?.name || "User"}
           </h1>
 
-          {/* ✅ PATIENT DETAILS (NON EDITABLE) */}
+          {/* PATIENT DETAILS */}
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Your Details</CardTitle>
@@ -68,13 +82,14 @@ const Dashboard: React.FC = () => {
               <p><strong>Email:</strong> {user?.email}</p>
               <p><strong>Phone:</strong> {user?.phone}</p>
               <p><strong>Blood Group:</strong> {user?.bloodGroup}</p>
+
               <p className="text-red-500 text-sm mt-2">
                 ⚠ Details cannot be edited after signup.
               </p>
             </CardContent>
           </Card>
 
-          {/* ✅ APPOINTMENT REMINDER SECTION */}
+          {/* APPOINTMENT REMINDER */}
           {upcomingReminder && (
             <Card className="mb-6 border-green-500">
               <CardHeader>
@@ -89,7 +104,7 @@ const Dashboard: React.FC = () => {
             </Card>
           )}
 
-          {/* ✅ APPOINTMENT SUMMARY */}
+          {/* APPOINTMENT SECTION */}
           <Card>
             <CardHeader>
               <CardTitle>Appointments</CardTitle>
@@ -101,7 +116,7 @@ const Dashboard: React.FC = () => {
               </p>
 
               <button
-                onClick={() => navigate("/appointment")}
+                onClick={handleAppointmentClick}
                 className="bg-gradient-hero text-white px-4 py-2 rounded-lg"
               >
                 Book / Manage Appointment

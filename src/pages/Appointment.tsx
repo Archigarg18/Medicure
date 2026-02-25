@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
 import { motion } from "framer-motion";
 import { Calendar, Loader2 } from "lucide-react";
@@ -16,7 +17,11 @@ import { useToast } from "@/components/ui/use-toast";
 
 const Appointment = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const user = JSON.parse(localStorage.getItem("loggedUser") || "{}");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -27,6 +32,21 @@ const Appointment = () => {
     time: "",
     notes: "",
   });
+
+  // ✅ Protect page + auto-fill user data
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+    }));
+  }, [isLoggedIn, navigate, user]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -45,13 +65,7 @@ const Appointment = () => {
   };
 
   const handleSubmit = async () => {
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.phone ||
-      !formData.date ||
-      !formData.time
-    ) {
+    if (!formData.department || !formData.date || !formData.time) {
       toast({
         title: "Missing Fields",
         description: "Please fill in all required fields.",
@@ -63,7 +77,6 @@ const Appointment = () => {
     setLoading(true);
 
     try {
-      // ✅ Save appointment to backend
       const response = await fetch(
         "http://localhost:5000/api/appointments",
         {
@@ -77,7 +90,7 @@ const Appointment = () => {
         throw new Error("Failed to book");
       }
 
-      // ✅ ALSO store in localStorage for reminder system
+      // ✅ Store locally for reminder system
       const existingAppointments = JSON.parse(
         localStorage.getItem("appointments") || "[]"
       );
@@ -95,19 +108,21 @@ const Appointment = () => {
       toast({
         title: "Appointment Booked!",
         description:
-          "We received your request. You will get a reminder 1 day before.",
+          "You will receive a reminder 1 day before your appointment.",
       });
 
-      // ✅ Reset form
       setFormData({
-        name: "",
-        email: "",
-        phone: "",
+        name: user?.name || "",
+        email: user?.email || "",
+        phone: user?.phone || "",
         department: "",
         date: "",
         time: "",
         notes: "",
       });
+
+      navigate("/dashboard");
+
     } catch (error) {
       toast({
         title: "Error",
@@ -137,8 +152,7 @@ const Appointment = () => {
             </h1>
 
             <p className="text-muted-foreground max-w-md mx-auto">
-              Fill in your details and we'll confirm your appointment.
-              You'll get a reminder 1 day before.
+              Your personal details are auto-filled and cannot be edited.
             </p>
           </motion.div>
 
@@ -149,124 +163,81 @@ const Appointment = () => {
             className="max-w-lg mx-auto p-8 rounded-xl bg-card shadow-card border border-border/50"
           >
             <div className="flex flex-col gap-5">
-              {/* Name */}
-              <div>
-                <label className="text-sm font-medium block mb-1.5">
-                  Full Name
-                </label>
-                <Input
-                  id="name"
-                  placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={handleChange}
-                />
-              </div>
 
-              {/* Email */}
-              <div>
-                <label className="text-sm font-medium block mb-1.5">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </div>
+              {/* Name (Disabled) */}
+              <Input
+                id="name"
+                value={formData.name}
+                disabled
+              />
 
-              {/* Phone */}
-              <div>
-                <label className="text-sm font-medium block mb-1.5">
-                  Phone
-                </label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+91 98765 43210"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-              </div>
+              {/* Email (Disabled) */}
+              <Input
+                id="email"
+                value={formData.email}
+                disabled
+              />
+
+              {/* Phone (Disabled) */}
+              <Input
+                id="phone"
+                value={formData.phone}
+                disabled
+              />
 
               {/* Department */}
-              <div>
-                <label className="text-sm font-medium block mb-1.5">
-                  Department
-                </label>
-                <Select
-                  onValueChange={handleSelectChange}
-                  value={formData.department}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
-                  </SelectTrigger>
+              <Select
+                onValueChange={handleSelectChange}
+                value={formData.department}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select department" />
+                </SelectTrigger>
 
-                  <SelectContent>
-                    {[
-                      "Cardiology",
-                      "Neurology",
-                      "Orthopedic",
-                      "Ophthalmology",
-                      "Pediatrics",
-                      "General",
-                      "Dermatology",
-                      "Dentistry",
-                    ].map((d) => (
-                      <SelectItem
-                        key={d}
-                        value={d.toLowerCase()}
-                      >
-                        {d}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                <SelectContent>
+                  {[
+                    "Cardiology",
+                    "Neurology",
+                    "Orthopedic",
+                    "Ophthalmology",
+                    "Pediatrics",
+                    "General",
+                    "Dermatology",
+                    "Dentistry",
+                  ].map((d) => (
+                    <SelectItem key={d} value={d.toLowerCase()}>
+                      {d}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               {/* Date + Time */}
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium block mb-1.5">
-                    Date
-                  </label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                  />
-                </div>
+                <Input
+                  id="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                />
 
-                <div>
-                  <label className="text-sm font-medium block mb-1.5">
-                    Time
-                  </label>
-                  <Input
-                    id="time"
-                    type="time"
-                    value={formData.time}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="text-sm font-medium block mb-1.5">
-                  Notes (optional)
-                </label>
-                <Textarea
-                  id="notes"
-                  placeholder="Any specific concerns..."
-                  rows={3}
-                  value={formData.notes}
+                <Input
+                  id="time"
+                  type="time"
+                  value={formData.time}
                   onChange={handleChange}
                 />
               </div>
 
-              {/* Submit */}
+              {/* Notes */}
+              <Textarea
+                id="notes"
+                placeholder="Any specific concerns..."
+                rows={3}
+                value={formData.notes}
+                onChange={handleChange}
+              />
+
               <Button
                 size="lg"
                 className="w-full font-semibold mt-2"
@@ -283,6 +254,7 @@ const Appointment = () => {
                   ? "Confirming..."
                   : "Confirm Appointment"}
               </Button>
+
             </div>
           </motion.div>
         </div>

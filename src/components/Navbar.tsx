@@ -20,18 +20,23 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // ✅ Get logged user
-  const user = JSON.parse(
-    localStorage.getItem("loggedUser") || "{}"
-  );
-
+  const user = JSON.parse(localStorage.getItem("loggedUser") || "{}");
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
-  // ✅ Logout Function
+  // ✅ Logout
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("loggedUser");
     navigate("/login");
+  };
+
+  // ✅ Protect Appointment Button
+  const handleAppointmentClick = () => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    } else {
+      navigate("/appointment");
+    }
   };
 
   return (
@@ -66,7 +71,7 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* ✅ User Section */}
+        {/* User Section */}
         <div className="hidden lg:flex items-center gap-3">
 
           <a
@@ -77,14 +82,14 @@ const Navbar = () => {
             108
           </a>
 
-          {/* If Logged In */}
           {isLoggedIn ? (
             <>
               <span className="text-sm font-medium">
                 {user?.name}
               </span>
 
-              <Link to="/profile">
+              {/* ✅ Now opens Dashboard */}
+              <Link to="/dashboard">
                 <Button variant="outline">Profile</Button>
               </Link>
 
@@ -107,11 +112,14 @@ const Navbar = () => {
             </>
           )}
 
-          <Link to="/appointment">
-            <Button className="bg-gradient-hero text-primary-foreground font-semibold hover:opacity-90">
-              Book Appointment
-            </Button>
-          </Link>
+          {/* ✅ Protected Book Appointment */}
+          <Button
+            onClick={handleAppointmentClick}
+            className="bg-gradient-hero text-primary-foreground font-semibold hover:opacity-90"
+          >
+            Book Appointment
+          </Button>
+
         </div>
 
         {/* Mobile Toggle */}
@@ -148,24 +156,36 @@ const Navbar = () => {
                 </Link>
               ))}
 
-              <Link
-                to="/appointment"
-                onClick={() => setOpen(false)}
+              {/* Protected Mobile Appointment */}
+              <Button
+                onClick={() => {
+                  setOpen(false);
+                  handleAppointmentClick();
+                }}
+                className="w-full bg-gradient-hero text-white"
               >
-                <Button className="w-full bg-gradient-hero text-white">
-                  Book Appointment
-                </Button>
-              </Link>
+                Book Appointment
+              </Button>
 
-              {/* Mobile Login/Logout */}
               {isLoggedIn ? (
-                <Button
-                  variant="destructive"
-                  onClick={handleLogout}
-                  className="w-full"
-                >
-                  Logout
-                </Button>
+                <>
+                  <Link to="/dashboard" onClick={() => setOpen(false)}>
+                    <Button variant="outline" className="w-full">
+                      Profile
+                    </Button>
+                  </Link>
+
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      setOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full"
+                  >
+                    Logout
+                  </Button>
+                </>
               ) : (
                 <>
                   <Link to="/login">
