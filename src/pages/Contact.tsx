@@ -90,12 +90,20 @@ const Contact = () => {
                 ))}
               </div>
 
-              {/* Map placeholder */}
-              <div className="rounded-xl overflow-hidden border border-border/50 h-64 bg-secondary flex items-center justify-center">
-                <div className="text-center text-muted-foreground">
-                  <MapPin className="w-8 h-8 mx-auto mb-2" />
-                  <p className="text-sm">Map integration coming soon</p>
-                  <p className="text-xs">Main Home Office Road, India</p>
+              {/* Embedded map for Chitkara University, Rajpura, Punjab */}
+              <div className="rounded-xl overflow-hidden border border-border/50">
+                <div className="w-full h-64 sm:h-80">
+                  <iframe
+                    title="Chitkara University Rajpura Map"
+                    src="https://maps.google.com/maps?q=Chitkara%20University%20Rajpura%20Punjab&z=15&output=embed"
+                    className="w-full h-full border-0"
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+                <div className="p-3 bg-card/40 flex justify-end">
+                  <a href="https://www.google.com/maps/search/?api=1&query=Chitkara+University+Rajpura+Punjab" target="_blank" rel="noreferrer" className="text-sm text-primary underline">Open in Google Maps</a>
                 </div>
               </div>
             </div>
