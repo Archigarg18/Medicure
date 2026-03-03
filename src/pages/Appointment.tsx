@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
 import { motion } from "framer-motion";
 import { Calendar, Loader2 } from "lucide-react";
+import allDoctors from "@/lib/doctors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,10 +29,22 @@ const Appointment = () => {
     email: "",
     phone: "",
     department: "",
+    doctor: "",
     date: "",
     time: "",
     notes: "",
   });
+
+  const [availableDoctors, setAvailableDoctors] = useState<any[]>([]);
+
+  // Get unique specialties from allDoctors, sorted alphabetically
+  const departmentOptions = Array.from(
+    new Set(allDoctors.map((d) => d.specialty))
+  ).sort();
+
+  const handleDoctorChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, doctor: value }));
+  };
 
   // ✅ Protect page + auto-fill user data
   useEffect(() => {
@@ -47,6 +60,35 @@ const Appointment = () => {
       phone: user?.phone || "",
     }));
   }, [isLoggedIn, navigate, user]);
+
+  // Prefill from link state (when coming from Doctors page)
+  const location = useLocation();
+  useEffect(() => {
+    const state = (location as any).state;
+    if (state) {
+      const { doctor, department } = state as { doctor?: string; department?: string };
+      setFormData((prev) => ({
+        ...prev,
+        doctor: doctor || prev.doctor,
+        department: department || prev.department,
+      }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // keep available doctors in sync when department changes
+  useEffect(() => {
+    if (!formData.department) {
+      setAvailableDoctors([]);
+      return;
+    }
+    const matches = allDoctors.filter((d) => d.specialty === formData.department);
+    setAvailableDoctors(matches);
+    // if only one doctor and none selected, preselect
+    if (matches.length === 1 && !formData.doctor) {
+      setFormData((prev) => ({ ...prev, doctor: matches[0].name }));
+    }
+  }, [formData.department]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -116,6 +158,7 @@ const Appointment = () => {
         email: user?.email || "",
         phone: user?.phone || "",
         department: "",
+        doctor: "",
         date: "",
         time: "",
         notes: "",
@@ -195,22 +238,32 @@ const Appointment = () => {
                 </SelectTrigger>
 
                 <SelectContent>
-                  {[
-                    "Cardiology",
-                    "Neurology",
-                    "Orthopedic",
-                    "Ophthalmology",
-                    "Pediatrics",
-                    "General",
-                    "Dermatology",
-                    "Dentistry",
-                  ].map((d) => (
-                    <SelectItem key={d} value={d.toLowerCase()}>
+                  {departmentOptions.map((d) => (
+                    <SelectItem key={d} value={d}>
                       {d}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+
+              {/* Doctor (filtered by department) */}
+              {availableDoctors.length > 0 ? (
+                <Select onValueChange={handleDoctorChange} value={formData.doctor}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select doctor" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {availableDoctors.map((d) => (
+                      <SelectItem key={d.name} value={d.name}>
+                        {d.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input id="doctor" value={formData.doctor} placeholder="Select department to choose doctor" disabled />
+              )}
 
               {/* Date + Time */}
               <div className="grid grid-cols-2 gap-4">

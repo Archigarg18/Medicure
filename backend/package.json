@@ -1,20 +1,56 @@
 {
   "name": "heal-home-net-backend",
   "version": "1.0.0",
+  "description": "Backend for Heal Home Net - Hospital Management System",
+  "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "tsx src/server.ts",
+    "start:prod": "node dist/server.js",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write \"src/**/*.ts\""
   },
+  "keywords": [
+    "healthcare",
+    "hospital",
+    "management",
+    "nodejs",
+    "express",
+    "prisma",
+    "mongodb"
+  ],
+  "author": "Chitkara University",
+  "license": "MIT",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
+    "@prisma/client": "^5.20.0",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.3",
-    "morgan": "^1.10.0"
+    "express": "^4.21.0",
+    "express-validator": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "@types/bcryptjs": "^2.4.6",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/morgan": "^1.9.9",
+    "@types/cors": "^2.8.12",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.11.5",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "prisma": "^5.20.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
   }
 }

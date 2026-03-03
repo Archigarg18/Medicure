@@ -29,105 +29,7 @@ const departments = [
   { id: "ent", name: "ENT", icon: Ear, color: "bg-medical-blue-light text-medical-blue" },
 ];
 
-const allDoctors = [
-  // Cardiology
-  { name: "Dr. Priya Sharma", specialty: "Cardiology", rating: 4.9, exp: 15, color: "bg-medical-coral-light text-medical-coral" },
-  { name: "Dr. Rajesh Kumar", specialty: "Cardiology", rating: 4.8, exp: 12, color: "bg-medical-coral-light text-medical-coral" },
-  { name: "Dr. Anjali Desai", specialty: "Cardiology", rating: 4.7, exp: 10, color: "bg-medical-coral-light text-medical-coral" },
-  { name: "Dr. Vikram Singh", specialty: "Cardiology", rating: 4.9, exp: 18, color: "bg-medical-coral-light text-medical-coral" },
-  
-  // Neurology
-  { name: "Dr. Arjun Patel", specialty: "Neurology", rating: 4.8, exp: 12, color: "bg-medical-purple-light text-medical-purple" },
-  { name: "Dr. Neha Reddy", specialty: "Neurology", rating: 4.9, exp: 14, color: "bg-medical-purple-light text-medical-purple" },
-  { name: "Dr. Sanjay Rao", specialty: "Neurology", rating: 4.6, exp: 9, color: "bg-medical-purple-light text-medical-purple" },
-  { name: "Dr. Isha Verma", specialty: "Neurology", rating: 4.8, exp: 11, color: "bg-medical-purple-light text-medical-purple" },
-  
-  // Orthopedics
-  { name: "Dr. Neha Gupta", specialty: "Orthopedics", rating: 4.7, exp: 10, color: "bg-medical-blue-light text-medical-blue" },
-  { name: "Dr. Arun Menon", specialty: "Orthopedics", rating: 4.8, exp: 13, color: "bg-medical-blue-light text-medical-blue" },
-  { name: "Dr. Priya Singh", specialty: "Orthopedics", rating: 4.9, exp: 16, color: "bg-medical-blue-light text-medical-blue" },
-  { name: "Dr. Rohit Kumar", specialty: "Orthopedics", rating: 4.6, exp: 8, color: "bg-medical-blue-light text-medical-blue" },
-  
-  // Pediatrics
-  { name: "Dr. Sneha Reddy", specialty: "Pediatrics", rating: 4.8, exp: 8, color: "bg-medical-teal-light text-medical-teal" },
-  { name: "Dr. Meera Joshi", specialty: "Pediatrics", rating: 4.9, exp: 7, color: "bg-medical-teal-light text-medical-teal" },
-  { name: "Dr. Kavya Nair", specialty: "Pediatrics", rating: 4.7, exp: 6, color: "bg-medical-teal-light text-medical-teal" },
-  { name: "Dr. Pooja Sharma", specialty: "Pediatrics", rating: 4.8, exp: 9, color: "bg-medical-teal-light text-medical-teal" },
-  
-  // Dermatology
-  { name: "Dr. Avni Kapoor", specialty: "Dermatology", rating: 4.7, exp: 9, color: "bg-medical-amber-light text-medical-amber" },
-  { name: "Dr. Ritika Das", specialty: "Dermatology", rating: 4.8, exp: 11, color: "bg-medical-amber-light text-medical-amber" },
-  { name: "Dr. Swati Pal", specialty: "Dermatology", rating: 4.9, exp: 13, color: "bg-medical-amber-light text-medical-amber" },
-  { name: "Dr. Divya Sinha", specialty: "Dermatology", rating: 4.6, exp: 7, color: "bg-medical-amber-light text-medical-amber" },
-  
-  // Ophthalmology
-  { name: "Dr. Ravi Kumar", specialty: "Ophthalmology", rating: 4.9, exp: 18, color: "bg-medical-coral-light text-medical-coral" },
-  { name: "Dr. Suresh Menon", specialty: "Ophthalmology", rating: 4.7, exp: 10, color: "bg-medical-coral-light text-medical-coral" },
-  { name: "Dr. Lisa Johnson", specialty: "Ophthalmology", rating: 4.8, exp: 14, color: "bg-medical-coral-light text-medical-coral" },
-  { name: "Dr. Ashok Patel", specialty: "Ophthalmology", rating: 4.6, exp: 8, color: "bg-medical-coral-light text-medical-coral" },
-  
-  // Gastroenterology
-  { name: "Dr. Sanjay Verma", specialty: "Gastroenterology", rating: 4.8, exp: 12, color: "bg-medical-purple-light text-medical-purple" },
-  { name: "Dr. Anita Singh", specialty: "Gastroenterology", rating: 4.7, exp: 10, color: "bg-medical-purple-light text-medical-purple" },
-  { name: "Dr. Ramesh Gupta", specialty: "Gastroenterology", rating: 4.9, exp: 15, color: "bg-medical-purple-light text-medical-purple" },
-  { name: "Dr. Nisha Kapoor", specialty: "Gastroenterology", rating: 4.6, exp: 7, color: "bg-medical-purple-light text-medical-purple" },
-  
-  // Pulmonology
-  { name: "Dr. Vikram Rao", specialty: "Pulmonology", rating: 4.8, exp: 11, color: "bg-medical-blue-light text-medical-blue" },
-  { name: "Dr. Harpreet Singh", specialty: "Pulmonology", rating: 4.7, exp: 9, color: "bg-medical-blue-light text-medical-blue" },
-  { name: "Dr. Pooja Nair", specialty: "Pulmonology", rating: 4.9, exp: 13, color: "bg-medical-blue-light text-medical-blue" },
-  { name: "Dr. Aditya Verma", specialty: "Pulmonology", rating: 4.6, exp: 8, color: "bg-medical-blue-light text-medical-blue" },
-  
-  // Endocrinology
-  { name: "Dr. Meera Singh", specialty: "Endocrinology", rating: 4.8, exp: 10, color: "bg-medical-teal-light text-medical-teal" },
-  { name: "Dr. Sameer Nair", specialty: "Endocrinology", rating: 4.7, exp: 8, color: "bg-medical-teal-light text-medical-teal" },
-  { name: "Dr. Priya Kumar", specialty: "Endocrinology", rating: 4.9, exp: 12, color: "bg-medical-teal-light text-medical-teal" },
-  
-  // Nephrology
-  { name: "Dr. Arun Singh", specialty: "Nephrology", rating: 4.7, exp: 11, color: "bg-medical-amber-light text-medical-amber" },
-  { name: "Dr. Sumeeta Rao", specialty: "Nephrology", rating: 4.8, exp: 9, color: "bg-medical-amber-light text-medical-amber" },
-  { name: "Dr. Deepak Verma", specialty: "Nephrology", rating: 4.9, exp: 14, color: "bg-medical-amber-light text-medical-amber" },
-  
-  // Urology
-  { name: "Dr. Anand Kumar", specialty: "Urology", rating: 4.8, exp: 12, color: "bg-medical-coral-light text-medical-coral" },
-  { name: "Dr. Rohan Sinha", specialty: "Urology", rating: 4.7, exp: 10, color: "bg-medical-coral-light text-medical-coral" },
-  { name: "Dr. Varun Patel", specialty: "Urology", rating: 4.9, exp: 15, color: "bg-medical-coral-light text-medical-coral" },
-  
-  // Oncology
-  { name: "Dr. Samit Rao", specialty: "Oncology", rating: 4.9, exp: 16, color: "bg-medical-purple-light text-medical-purple" },
-  { name: "Dr. Anuradha Singh", specialty: "Oncology", rating: 4.8, exp: 13, color: "bg-medical-purple-light text-medical-purple" },
-  { name: "Dr. Vivek Gupta", specialty: "Oncology", rating: 4.7, exp: 11, color: "bg-medical-purple-light text-medical-purple" },
-  
-  // Pathology
-  { name: "Dr. Hemant Kumar", specialty: "Pathology", rating: 4.7, exp: 9, color: "bg-medical-blue-light text-medical-blue" },
-  { name: "Dr. Shreya Nair", specialty: "Pathology", rating: 4.8, exp: 10, color: "bg-medical-blue-light text-medical-blue" },
-  { name: "Dr. Rajiv Singh", specialty: "Pathology", rating: 4.9, exp: 14, color: "bg-medical-blue-light text-medical-blue" },
-  
-  // Hematology
-  { name: "Dr. Kanika Patel", specialty: "Hematology", rating: 4.8, exp: 11, color: "bg-medical-teal-light text-medical-teal" },
-  { name: "Dr. Siddharth Verma", specialty: "Hematology", rating: 4.7, exp: 9, color: "bg-medical-teal-light text-medical-teal" },
-  { name: "Dr. Anjali Rao", specialty: "Hematology", rating: 4.9, exp: 13, color: "bg-medical-teal-light text-medical-teal" },
-  
-  // Radiology
-  { name: "Dr. Manish Kumar", specialty: "Radiology", rating: 4.8, exp: 12, color: "bg-medical-amber-light text-medical-amber" },
-  { name: "Dr. Priya Saxena", specialty: "Radiology", rating: 4.9, exp: 15, color: "bg-medical-amber-light text-medical-amber" },
-  { name: "Dr. Arun Joshi", specialty: "Radiology", rating: 4.7, exp: 10, color: "bg-medical-amber-light text-medical-amber" },
-  
-  // Gynecology
-  { name: "Dr. Shalini Desai", specialty: "Gynecology", rating: 4.9, exp: 14, color: "bg-medical-coral-light text-medical-coral" },
-  { name: "Dr. Divya Rao", specialty: "Gynecology", rating: 4.8, exp: 11, color: "bg-medical-coral-light text-medical-coral" },
-  { name: "Dr. Megha Rao", specialty: "Gynecology", rating: 4.7, exp: 9, color: "bg-medical-coral-light text-medical-coral" },
-  
-  // Psychiatry
-  { name: "Dr. Rohit Nair", specialty: "Psychiatry", rating: 4.8, exp: 13, color: "bg-medical-purple-light text-medical-purple" },
-  { name: "Dr. Neelam Verma", specialty: "Psychiatry", rating: 4.9, exp: 15, color: "bg-medical-purple-light text-medical-purple" },
-  { name: "Dr. Arjun Das", specialty: "Psychiatry", rating: 4.7, exp: 10, color: "bg-medical-purple-light text-medical-purple" },
-  
-  // ENT
-  { name: "Dr. Vimal Kumar", specialty: "ENT", rating: 4.8, exp: 10, color: "bg-medical-blue-light text-medical-blue" },
-  { name: "Dr. Priyanka Singh", specialty: "ENT", rating: 4.9, exp: 12, color: "bg-medical-blue-light text-medical-blue" },
-  { name: "Dr. Ajay Patel", specialty: "ENT", rating: 4.6, exp: 8, color: "bg-medical-blue-light text-medical-blue" },
-];
+import { allDoctors } from "@/lib/doctors";
 
 const Doctors = () => {
   const [selectedDept, setSelectedDept] = useState<string | null>(null);
@@ -209,7 +111,7 @@ return (
                     <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-medical-amber" />{doc.rating}</span>
                     <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{doc.exp}y exp</span>
                   </div>
-                  <Link to="/appointment" className="w-full">
+                  <Link to="/appointment" state={{ doctor: doc.name, department: doc.specialty }} className="w-full">
                     <Button size="sm" className="w-full bg-gradient-hero text-primary-foreground hover:opacity-90 font-semibold">
                       Book Appointment
                     </Button>

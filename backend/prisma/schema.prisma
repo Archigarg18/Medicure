@@ -1,0 +1,218 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  email         String    @unique
+  password      String
+  name          String
+  phone         String?
+  role          String    @default("user") // user, doctor, admin
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  doctorProfile Doctor?
+  appointments  Appointment[]
+  prescriptions Prescription[]
+}
+
+// Doctor model
+model Doctor {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String    @unique @db.ObjectId
+  specialty     String
+  experience    Int
+  rating        Float     @default(0)
+  bio           String?
+  consultationFee Float
+  availableSlots String[]  // JSON array of available time slots
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments  Appointment[]
+}
+
+// Appointment model
+model Appointment {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String    @db.ObjectId
+  doctorId      String    @db.ObjectId
+  appointmentDate DateTime
+  status        String    @default("pending") // pending, confirmed, completed, cancelled
+  notes         String?
+  roomNumber    String?
+  bedNumber     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  doctor        Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+}
+
+// Pharmacy/Medicine model
+model Medicine {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  category      String
+  price         Float
+  stock         Int
+  description   String?
+  type          String    // Tablet, Injection, Syrup, Gel, Capsule, Lozenge
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  prescriptions Prescription[]
+}
+
+// Prescription model
+model Prescription {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String    @db.ObjectId
+  medicineId    String    @db.ObjectId
+  doctorId      String?   @db.ObjectId
+  quantity      Int
+  dosage        String?
+  instructions  String?
+  roomNumber    String?
+  bedNumber     String?
+  paymentStatus String    @default("pending") // pending, completed
+  amount        Float
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  medicine      Medicine  @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+}
+
+// Blood Bank model
+model BloodStock {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  bloodType     String    @unique // O+, O-, A+, A-, B+, B-, AB+, AB-
+  quantity      Int
+  lastUpdated   DateTime  @default(now()) @updatedAt
+
+  // Relations
+  requests      BloodRequest[]
+}
+
+// Blood Request model
+model BloodRequest {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String    @db.ObjectId
+  bloodType     String
+  quantity      Int
+  urgency       String    @default("normal") // normal, urgent, emergency
+  status        String    @default("pending") // pending, approved, rejected, completed
+  roomNumber    String?
+  bedNumber     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  bloodStock    BloodStock @relation(fields: [bloodType], references: [bloodType])
+
+  @@unique([userId, id])
+}
+
+// Ambulance model
+model Ambulance {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  vehicleNumber String    @unique
+  driverName    String
+  driverPhone   String
+  status        String    @default("available") // available, busy, maintenance
+  location      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  requests      AmbulanceRequest[]
+}
+
+// Ambulance Request model
+model AmbulanceRequest {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String    @db.ObjectId
+  ambulanceId   String?   @db.ObjectId
+  pickupLocation String
+  dropoffLocation String
+  urgency       String    @default("normal") // normal, urgent, emergency
+  status        String    @default("pending") // pending, assigned, in-transit, completed
+  estimatedFare Float?
+  actualFare    Float?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  ambulance     Ambulance? @relation(fields: [ambulanceId], references: [id], onDelete: SetNull)
+}
+
+// Bed Management model
+model Bed {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  roomNumber    String
+  bedNumber     String
+  bedType       String    // Single, Double, ICU, General
+  status        String    @default("available") // available, occupied, maintenance
+  charges       Float
+  patientName   String?
+  admissionDate DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([roomNumber, bedNumber])
+}
+
+// Contact Us model
+model Contact {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String
+  phone         String?
+  message       String
+  status        String    @default("new") // new, read, resolved
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Period Tracker model
+model PeriodLog {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String    @db.ObjectId
+  startDate     DateTime
+  endDate       DateTime?
+  symptoms      String[]
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Canteen Order model
+model CanteenOrder {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String    @db.ObjectId
+  items         String[]  // JSON array of items
+  totalAmount   Float
+  roomNumber    String
+  bedNumber     String?
+  status        String    @default("pending") // pending, preparing, delivered
+  paymentId     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
