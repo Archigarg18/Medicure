@@ -32,12 +32,19 @@ const Contact = () => {
     }
 
     setLoading(true);
+    const apiUrl = "http://localhost:5000/api/contact";
+    
     try {
-      const response = await fetch("http://localhost:5000/api/contact", {
+      console.log("📤 Sending contact form to:", apiUrl);
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+
+      console.log("📥 Response status:", response.status);
+      const responseData = await response.json();
+      console.log("📥 Response data:", responseData);
 
       if (response.ok) {
         toast({
@@ -46,12 +53,14 @@ const Contact = () => {
         });
         setFormData({ name: "", email: "", phone: "", message: "" });
       } else {
-        throw new Error("Failed to send");
+        throw new Error(responseData.message || `Failed to send message (${response.status})`);
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Unknown error occurred";
+      console.error("❌ Contact form error:", errorMsg);
       toast({
         title: "Error",
-        description: "Could not send message. Please try again.",
+        description: `${errorMsg} - Make sure backend is running on http://localhost:5000`,
         variant: "destructive",
       });
     } finally {

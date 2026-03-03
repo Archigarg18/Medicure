@@ -13,6 +13,7 @@ const Dashboard: React.FC = () => {
   const user = JSON.parse(localStorage.getItem("loggedUser") || "{}");
 
   const [upcomingReminder, setUpcomingReminder] = useState<string | null>(null);
+  const [appointments, setAppointments] = useState<any[]>([]);
 
   // ✅ Protect Dashboard (No direct access without login)
   useEffect(() => {
@@ -21,12 +22,48 @@ const Dashboard: React.FC = () => {
     }
   }, [isLoggedIn, navigate]);
 
+  // ✅ Load appointments for this specific user from localStorage
+  useEffect(() => {
+    const storageKey = `appointments_${user?.email}`;
+    // migrate legacy global key if present
+    const legacy = JSON.parse(localStorage.getItem("appointments") || "[]");
+    if (legacy.length) {
+      const mine = (legacy as any[]).filter((apt) => apt.email === user?.email);
+      if (mine.length) {
+        localStorage.setItem(storageKey, JSON.stringify(mine));
+      }
+      // optionally remove the old global list to avoid confusion
+      localStorage.removeItem("appointments");
+    }
+    const storedAppointments = JSON.parse(
+      localStorage.getItem(storageKey) || "[]"
+    );
+    setAppointments(storedAppointments);
+  }, [user]);
+
+  // ✅ Also fetch from backend to stay synchronized
+  useEffect(() => {
+    if (user?.email) {
+      fetch(`http://localhost:5000/api/appointments?email=${encodeURIComponent(
+        user.email
+      )}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.data)) {
+            setAppointments(data.data);
+            // update localStorage copy as well
+            const storageKey = `appointments_${user.email}`;
+            localStorage.setItem(storageKey, JSON.stringify(data.data));
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching appointments from backend:", err);
+        });
+    }
+  }, [user]);
+
   // ✅ Appointment Reminder Logic
   useEffect(() => {
-    const appointments = JSON.parse(
-      localStorage.getItem("appointments") || "[]"
-    );
-
     const today = new Date();
 
     appointments.forEach((appointment: any) => {
@@ -46,7 +83,7 @@ const Dashboard: React.FC = () => {
         );
       }
     });
-  }, [user]);
+  }, [appointments, user]);
 
   // ✅ Protect Appointment Button
   const handleAppointmentClick = () => {
@@ -111,16 +148,52 @@ const Dashboard: React.FC = () => {
             </CardHeader>
 
             <CardContent>
-              <p className="mb-4">
-                Manage your appointments from here.
-              </p>
-
-              <button
-                onClick={handleAppointmentClick}
-                className="bg-gradient-hero text-white px-4 py-2 rounded-lg"
-              >
-                Book / Manage Appointment
-              </button>
+              {appointments.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border-collapse">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2 font-semibold">Department</th>
+                          <th className="text-left p-2 font-semibold">Doctor</th>
+                          <th className="text-left p-2 font-semibold">Date</th>
+                          <th className="text-left p-2 font-semibold">Time</th>
+                          <th className="text-left p-2 font-semibold">Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {appointments.map((apt, idx) => (
+                          <tr key={idx} className="border-b hover:bg-secondary/50">
+                            <td className="p-2">{apt.department || "N/A"}</td>
+                            <td className="p-2">{apt.doctor || "Not specified"}</td>
+                            <td className="p-2">{apt.date}</td>
+                            <td className="p-2">{apt.time}</td>
+                            <td className="p-2 text-xs text-muted-foreground">{apt.notes || "-"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <button
+                    onClick={handleAppointmentClick}
+                    className="bg-gradient-hero text-white px-4 py-2 rounded-lg"
+                  >
+                    Book New Appointment
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">
+                    No appointments booked yet.
+                  </p>
+                  <button
+                    onClick={handleAppointmentClick}
+                    className="bg-gradient-hero text-white px-4 py-2 rounded-lg"
+                  >
+                    Book an Appointment
+                  </button>
+                </div>
+              )}
             </CardContent>
           </Card>
 

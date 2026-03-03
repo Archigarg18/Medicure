@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "simple": "node server-simple.js",
     "build": "tsc",
     "start": "tsx src/server.ts",
     "start:prod": "node dist/server.js",

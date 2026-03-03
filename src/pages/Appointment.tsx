@@ -107,43 +107,51 @@ const Appointment = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.department || !formData.date || !formData.time) {
+    // Validate all required fields
+    if (!formData.name || !formData.email || !formData.phone || !formData.department || !formData.date || !formData.time) {
       toast({
         title: "Missing Fields",
-        description: "Please fill in all required fields.",
+        description: "Please fill in all required fields including name, email, phone, department, date, and time.",
         variant: "destructive",
       });
       return;
     }
 
     setLoading(true);
+    const apiUrl = "http://localhost:5000/api/appointments";
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/appointments",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+      console.log("📤 Sending appointment form to:", apiUrl);
+      console.log("📋 Form data:", formData);
+      
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      console.log("📥 Response status:", response.status);
+      const responseData = await response.json();
+      console.log("📥 Response data:", responseData);
 
       if (!response.ok) {
-        throw new Error("Failed to book");
+        throw new Error(responseData.message || `Failed to book appointment (${response.status})`);
       }
 
-      // ✅ Store locally for reminder system
+      // ✅ Store locally per-user for reminder system using server's copy
+      const storedAppointment = responseData.appointment || formData;
+      const storageKey = `appointments_${user?.email}`;
       const existingAppointments = JSON.parse(
-        localStorage.getItem("appointments") || "[]"
+        localStorage.getItem(storageKey) || "[]"
       );
 
       const updatedAppointments = [
         ...existingAppointments,
-        formData,
+        storedAppointment,
       ];
 
       localStorage.setItem(
-        "appointments",
+        storageKey,
         JSON.stringify(updatedAppointments)
       );
 
@@ -167,10 +175,11 @@ const Appointment = () => {
       navigate("/dashboard");
 
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Unknown error occurred";
+      console.error("❌ Appointment form error:", errorMsg);
       toast({
         title: "Error",
-        description:
-          "Could not book appointment. Please try again.",
+        description: `${errorMsg} - Make sure backend is running on http://localhost:5000`,
         variant: "destructive",
       });
     } finally {

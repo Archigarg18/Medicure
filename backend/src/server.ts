@@ -3,6 +3,10 @@ import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
+// @ts-ignore: importing JS file without type declarations
+import contactRouter from "../routes/contact.js";
+// @ts-ignore: importing JS file without type declarations
+import appointmentsRouter from "../routes/appointments.js";
 
 // Load environment variables
 dotenv.config();
@@ -79,6 +83,15 @@ app.get("/docs", (req: Request, res: Response) => {
     },
   });
 });
+
+// ==================== API ROUTES ====================
+
+// Register API routes
+console.log("📍 Registering API routes...");
+app.use("/api/contact", contactRouter);
+console.log("  ✓ /api/contact route registered");
+app.use("/api/appointments", appointmentsRouter);
+console.log("  ✓ /api/appointments route registered");
 
 // ==================== ERROR HANDLING MIDDLEWARE ====================
 

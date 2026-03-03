@@ -33,7 +33,15 @@ const SignUp: React.FC = () => {
     };
 
     // ✅ Save for login authentication
-    localStorage.setItem("user", JSON.stringify(userData));
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    // prevent duplicate email
+    if (users.find((u:any) => u.email === userData.email)) {
+      alert("An account with this email already exists. Please login.");
+      navigate("/login");
+      return;
+    }
+    users.push(userData);
+    localStorage.setItem("users", JSON.stringify(users));
 
     alert("Signup Successful! Please Login.");
 
