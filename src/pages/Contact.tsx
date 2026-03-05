@@ -32,7 +32,7 @@ const Contact = () => {
     }
 
     setLoading(true);
-    const apiUrl = "http://localhost:5000/api/contact";
+    const apiUrl = "http://localhost:5002/api/contact";
     
     try {
       console.log("📤 Sending contact form to:", apiUrl);
