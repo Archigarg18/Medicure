@@ -120,7 +120,7 @@ const Appointment = () => {
     setLoading(true);
     const apiUrl = "http://localhost:5002/api/appointments";
 
-    try {git 
+    try {
       console.log("📤 Sending appointment form to:", apiUrl);
       console.log("📋 Form data:", formData);
       
