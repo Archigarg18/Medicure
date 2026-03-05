@@ -90,5 +90,17 @@
     "time": "21:43",
     "notes": "pet",
     "createdAt": "2026-03-03T11:14:06.204Z"
+  },
+  {
+    "id": 1772720391401,
+    "name": "Archi",
+    "email": "archigarg9888@gmail.com",
+    "phone": "09888489545",
+    "department": "Neurology",
+    "doctor": "Dr. Neha Reddy",
+    "date": "2026-03-10",
+    "time": "21:49",
+    "notes": "vad",
+    "createdAt": "2026-03-05T14:19:51.401Z"
   }
 ]
