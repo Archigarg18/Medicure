@@ -56,10 +56,11 @@ const Appointment = () => {
       email: user?.email || "",
       phone: user?.phone || "",
     }));
-  }, [isLoggedIn, navigate, user]);
+  }, [isLoggedIn, navigate]);
 
   useEffect(() => {
     const state = (location as any).state;
+
     if (state) {
       const { doctor, department } = state as {
         doctor?: string;
@@ -72,7 +73,7 @@ const Appointment = () => {
         department: department || prev.department,
       }));
     }
-  }, []);
+  }, [location]);
 
   useEffect(() => {
     if (!formData.department) {
@@ -83,10 +84,14 @@ const Appointment = () => {
     const matches = allDoctors.filter(
       (d) => d.specialty === formData.department
     );
+
     setAvailableDoctors(matches);
 
     if (matches.length === 1 && !formData.doctor) {
-      setFormData((prev) => ({ ...prev, doctor: matches[0].name }));
+      setFormData((prev) => ({
+        ...prev,
+        doctor: matches[0].name,
+      }));
     }
   }, [formData.department]);
 
@@ -110,8 +115,7 @@ const Appointment = () => {
     ) {
       toast({
         title: "Missing Fields",
-        description:
-          "Please fill all required fields before booking.",
+        description: "Please fill all required fields before booking.",
         variant: "destructive",
       });
       return;
@@ -120,14 +124,11 @@ const Appointment = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${API_BASE}/api/appointments`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(`${API_BASE}/api/appointments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
       const responseData = await response.json();
 
@@ -146,9 +147,7 @@ const Appointment = () => {
       navigate("/dashboard");
     } catch (error) {
       const errorMsg =
-        error instanceof Error
-          ? error.message
-          : "Unknown error occurred";
+        error instanceof Error ? error.message : "Unknown error occurred";
 
       toast({
         title: "Error",
@@ -185,7 +184,6 @@ const Appointment = () => {
             className="max-w-lg mx-auto p-8 rounded-xl bg-card shadow-card border border-border/50"
           >
             <div className="flex flex-col gap-5">
-
               <Input id="name" value={formData.name} disabled />
               <Input id="email" value={formData.email} disabled />
               <Input id="phone" value={formData.phone} disabled />
