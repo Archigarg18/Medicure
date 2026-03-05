@@ -8,7 +8,7 @@ router.post("/", async (req, res) => {
   const { name, email, phone, message } = req.body;
 
   if (!name || !email || !message) {
-    return res.status(400).json({ message: "Missing required fields" });
+    return res.status(400).json({ success: false, message: "Missing required fields" });
   }
 
   try {
@@ -19,25 +19,27 @@ router.post("/", async (req, res) => {
       email,
       phone,
       message,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
     };
 
     messages.push(newMessage);
     await writeData(FILE_NAME, messages);
 
-    console.log("New Contact Message Received:", newMessage);
-    res.status(201).json({ message: "Message sent successfully", messageData: newMessage });
+    console.log("✓ New Contact Message Received:", newMessage);
+    res.status(201).json({ success: true, message: "Message sent successfully", messageData: newMessage });
   } catch (error) {
-    res.status(500).json({ message: "Error saving message" });
+    console.error("Error saving contact message:", error);
+    res.status(500).json({ success: false, message: "Error saving message", error: error.message });
   }
 });
 
 router.get("/", async (req, res) => {
   try {
     const messages = await readData(FILE_NAME);
-    res.json(messages);
+    res.status(200).json({ success: true, data: messages });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching messages" });
+    console.error("Error fetching messages:", error);
+    res.status(500).json({ success: false, message: "Error fetching messages", error: error.message });
   }
 });
 

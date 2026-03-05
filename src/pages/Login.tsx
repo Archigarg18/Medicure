@@ -12,20 +12,20 @@ const Login: React.FC = () => {
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const storedUser = localStorage.getItem("user");
-
-    if (!storedUser) {
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    if (!users.length) {
       alert("No account found. Please Sign Up first.");
       return;
     }
 
-    const parsedUser = JSON.parse(storedUser);
+    const parsedUser = users.find((u: any) => u.email === email);
+    if (!parsedUser) {
+      alert("No account with that email. Please Sign Up.");
+      return;
+    }
 
     // ✅ Check credentials
-    if (
-      email === parsedUser.email &&
-      password === parsedUser.password
-    ) {
+    if (password === parsedUser.password) {
       // ✅ Store login state
       localStorage.setItem("isLoggedIn", "true");
 

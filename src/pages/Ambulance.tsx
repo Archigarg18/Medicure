@@ -1,69 +1,205 @@
 import PageLayout from "@/components/PageLayout";
-import { motion } from "framer-motion";
-import { Truck, MapPin, Phone, Clock } from "lucide-react";
+import { Truck, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState, useRef } from "react";
 
-const ambulances = [
-  { id: "AMB-001", location: "Sector 22, Near City Mall", eta: "3 min", status: "available" },
-  { id: "AMB-002", location: "Main Hospital Road", eta: "1 min", status: "available" },
-  { id: "AMB-003", location: "Highway Junction", eta: "7 min", status: "en-route" },
-  { id: "AMB-004", location: "Green Park Area", eta: "5 min", status: "available" },
-  { id: "AMB-005", location: "Station Road", eta: "10 min", status: "en-route" },
+/* ---------------- 12 Ambulances ---------------- */
+
+const ambulanceData = [
+  { id: "AMB-001", location: "Sector 4", distanceKm: 0.8, type: "Ventilator" },
+  { id: "AMB-002", location: "Sector 12", distanceKm: 1.2, type: "ICU" },
+  { id: "AMB-003", location: "Model Town", distanceKm: 1.8, type: "Normal" },
+  { id: "AMB-004", location: "Civil Hospital", distanceKm: 2.0, type: "Ventilator" },
+  { id: "AMB-005", location: "Railway Road", distanceKm: 2.5, type: "ICU" },
+  { id: "AMB-006", location: "Green Park", distanceKm: 3.1, type: "Normal" },
+  { id: "AMB-007", location: "Bus Stand Area", distanceKm: 3.8, type: "ICU" },
+  { id: "AMB-008", location: "Old City Chowk", distanceKm: 4.2, type: "Normal" },
+  { id: "AMB-009", location: "District Hospital", distanceKm: 4.5, type: "Ventilator" },
+  { id: "AMB-010", location: "Main Bazaar", distanceKm: 4.8, type: "ICU" },
+  { id: "AMB-011", location: "Housing Board Colony", distanceKm: 5.0, type: "Normal" },
+  { id: "AMB-012", location: "New Bus Terminal", distanceKm: 5.5, type: "Ventilator" },
 ];
 
-const Ambulance = () => (
-  <PageLayout>
-    <section className="py-16">
-      <div className="container mx-auto px-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-6">
-          <h1 className="font-display text-3xl md:text-4xl font-bold mb-3"><span className="text-gradient-hero">Ambulance</span></h1>
-          <p className="text-muted-foreground max-w-md mx-auto">Find the nearest ambulance and get emergency help fast.</p>
-        </motion.div>
+const speed = 40; // km/h city speed
 
-        {/* Emergency CTA */}
-        <div className="max-w-md mx-auto mb-12">
-          <a href="tel:108">
-            <Button size="lg" className="w-full bg-destructive text-destructive-foreground hover:opacity-90 font-bold text-lg py-6">
-              <Phone className="w-5 h-5 mr-2" /> Call 108 — Emergency
-            </Button>
-          </a>
-        </div>
+const Ambulance = () => {
+  const [userArea, setUserArea] = useState("Detecting location...");
+  const [ambulances, setAmbulances] = useState([]);
+  const [bookedAmbulanceId, setBookedAmbulanceId] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(null);
+  const timerRef = useRef(null);
 
-        <h2 className="font-display font-semibold text-xl mb-6 text-center">Nearby Ambulances</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
-          {ambulances.map((amb, i) => (
-            <motion.div
-              key={amb.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="p-5 rounded-xl bg-card shadow-card border border-border/50"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-medical-coral" />
-                  <span className="font-display font-semibold text-sm">{amb.id}</span>
+  /* ---------------- LIVE LOCATION UPDATE ---------------- */
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setUserArea("Geolocation Not Supported");
+      return;
+    }
+
+    const watchId = navigator.geolocation.watchPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+          );
+
+          const data = await response.json();
+
+          const area =
+            data.address.suburb ||
+            data.address.city ||
+            data.address.town ||
+            data.address.village ||
+            "Your Area";
+
+          setUserArea(area);
+        } catch {
+          setUserArea("Location Found");
+        }
+      },
+      () => setUserArea("Location Permission Needed"),
+      { enableHighAccuracy: true }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
+
+  /* ---------------- SORT NEAREST FIRST ---------------- */
+
+  useEffect(() => {
+    const sorted = [...ambulanceData].sort(
+      (a, b) => a.distanceKm - b.distanceKm
+    );
+    setAmbulances(sorted);
+  }, []);
+
+  /* ---------------- TIME FORMAT ---------------- */
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return mins > 0 ? `${mins} min ${secs} sec` : `${secs} sec`;
+  };
+
+  /* ---------------- BOOKING ---------------- */
+
+  const handleBooking = (amb) => {
+    setBookedAmbulanceId(amb.id);
+
+    const totalSeconds = Math.ceil((amb.distanceKm / speed) * 3600);
+    setTimeLeft(totalSeconds);
+
+    let countdown = totalSeconds;
+
+    timerRef.current = setInterval(() => {
+      countdown--;
+      setTimeLeft(countdown);
+
+      if (countdown <= 0) {
+        clearInterval(timerRef.current);
+        alert("🚑 Ambulance Arrived!");
+        setBookedAmbulanceId(null);
+        setTimeLeft(null);
+      }
+    }, 1000);
+  };
+
+  const cancelBooking = () => {
+    clearInterval(timerRef.current);
+    setBookedAmbulanceId(null);
+    setTimeLeft(null);
+  };
+
+  return (
+    <PageLayout>
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold">🚑 Ambulance Services</h1>
+            <p className="text-blue-600 font-semibold mt-2">
+              📍 Your Location: {userArea}
+            </p>
+          </div>
+
+          {/* CALL 108 */}
+          <div className="max-w-md mx-auto mb-10">
+            <a href="tel:108">
+              <Button className="w-full bg-red-600 text-white py-6 text-lg font-bold">
+                <Phone className="w-5 h-5 mr-2" />
+                Call 108 — Emergency
+              </Button>
+            </a>
+          </div>
+
+          {/* LIST */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
+            {ambulances.map((amb, index) => {
+              const isBooked = bookedAmbulanceId === amb.id;
+
+              return (
+                <div
+                  key={amb.id}
+                  className={`p-5 rounded-xl shadow-lg border ${bookedAmbulanceId && !isBooked ? "opacity-40" : ""
+                    }`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm font-bold">{index + 1}.</span>
+                    <Truck className="w-5 h-5 text-red-500" />
+                    <span className="font-semibold">{amb.id}</span>
+                  </div>
+
+                  <p className="text-sm flex items-center gap-1 text-muted-foreground">
+                    <MapPin className="w-4 h-4" />
+                    {amb.location}
+                  </p>
+
+                  <p className="text-sm font-semibold text-green-600 mt-2">
+                    📍 {amb.distanceKm} km away
+                  </p>
+
+                  {!isBooked ? (
+                    <Button
+                      className="w-full mt-3"
+                      disabled={bookedAmbulanceId}
+                      onClick={() => handleBooking(amb)}
+                    >
+                      Book Ambulance
+                    </Button>
+                  ) : (
+                    <div className="mt-4 text-center">
+                      <p className="font-semibold text-green-600">
+                        🚑 On The Way
+                      </p>
+
+                      {timeLeft !== null && (
+                        <p className="text-red-600 text-xl font-bold mt-2">
+                          {formatTime(timeLeft)}
+                        </p>
+                      )}
+
+                      <Button
+                        variant="destructive"
+                        className="mt-3"
+                        onClick={cancelBooking}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
                 </div>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                  amb.status === "available" ? "bg-medical-teal-light text-medical-teal" : "bg-medical-amber-light text-medical-amber"
-                }`}>
-                  {amb.status === "available" ? "Available" : "En Route"}
-                </span>
-              </div>
-              <div className="flex items-start gap-2 text-sm text-muted-foreground mb-2">
-                <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-                {amb.location}
-              </div>
-              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Clock className="w-4 h-4 text-primary" />
-                ETA: {amb.eta}
-              </div>
-            </motion.div>
-          ))}
+              );
+            })}
+          </div>
+
         </div>
-      </div>
-    </section>
-  </PageLayout>
-);
+      </section>
+    </PageLayout>
+  );
+};
 
 export default Ambulance;
