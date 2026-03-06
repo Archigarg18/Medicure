@@ -6,6 +6,8 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
+const API_BASE = "http://localhost:5002";
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
@@ -15,60 +17,37 @@ const Dashboard: React.FC = () => {
   const [upcomingReminder, setUpcomingReminder] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<any[]>([]);
 
-  // ✅ Protect Dashboard (No direct access without login)
   useEffect(() => {
     if (!isLoggedIn) {
       navigate("/login");
     }
   }, [isLoggedIn, navigate]);
 
-  // ✅ Load appointments for this specific user from localStorage
-  useEffect(() => {
-    const storageKey = `appointments_${user?.email}`;
-    // migrate legacy global key if present
-    const legacy = JSON.parse(localStorage.getItem("appointments") || "[]");
-    if (legacy.length) {
-      const mine = (legacy as any[]).filter((apt) => apt.email === user?.email);
-      if (mine.length) {
-        localStorage.setItem(storageKey, JSON.stringify(mine));
-      }
-      // optionally remove the old global list to avoid confusion
-      localStorage.removeItem("appointments");
-    }
-    const storedAppointments = JSON.parse(
-      localStorage.getItem(storageKey) || "[]"
-    );
-    setAppointments(storedAppointments);
-  }, [user]);
-
-  // ✅ Also fetch from backend to stay synchronized
+  // ✅ FIXED FETCH (using query parameter + correct port)
   useEffect(() => {
     if (user?.email) {
-      fetch(`http://localhost:5000/api/appointments?email=${encodeURIComponent(
-        user.email
-      )}`)
+      fetch(
+        `${API_BASE}/api/appointments?email=${encodeURIComponent(
+          user.email
+        )}`
+      )
         .then((res) => res.json())
         .then((data) => {
           if (data.success && Array.isArray(data.data)) {
             setAppointments(data.data);
-            // update localStorage copy as well
-            const storageKey = `appointments_${user.email}`;
-            localStorage.setItem(storageKey, JSON.stringify(data.data));
           }
         })
         .catch((err) => {
-          console.error("Error fetching appointments from backend:", err);
+          console.error("Error fetching appointments:", err);
         });
     }
   }, [user]);
 
-  // ✅ Appointment Reminder Logic
   useEffect(() => {
     const today = new Date();
 
     appointments.forEach((appointment: any) => {
       const appointmentDate = new Date(appointment.date);
-
       const diffTime = appointmentDate.getTime() - today.getTime();
       const diffDays = diffTime / (1000 * 3600 * 24);
 
@@ -76,16 +55,10 @@ const Dashboard: React.FC = () => {
         setUpcomingReminder(
           `🔔 Reminder: Your appointment is tomorrow at ${appointment.time}`
         );
-
-        // ✅ Simulated Email Notification
-        console.log(
-          `Email Sent To ${user?.email}: Your appointment is tomorrow at ${appointment.time}`
-        );
       }
     });
-  }, [appointments, user]);
+  }, [appointments]);
 
-  // ✅ Protect Appointment Button
   const handleAppointmentClick = () => {
     if (!isLoggedIn) {
       navigate("/login");
@@ -104,12 +77,10 @@ const Dashboard: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          {/* USER NAME */}
           <h1 className="text-3xl font-bold mb-4">
             Welcome, {user?.name || "User"}
           </h1>
 
-          {/* PATIENT DETAILS */}
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Your Details</CardTitle>
@@ -126,7 +97,6 @@ const Dashboard: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* APPOINTMENT REMINDER */}
           {upcomingReminder && (
             <Card className="mb-6 border-green-500">
               <CardHeader>
@@ -141,7 +111,6 @@ const Dashboard: React.FC = () => {
             </Card>
           )}
 
-          {/* APPOINTMENT SECTION */}
           <Card>
             <CardHeader>
               <CardTitle>Appointments</CardTitle>
@@ -168,12 +137,15 @@ const Dashboard: React.FC = () => {
                             <td className="p-2">{apt.doctor || "Not specified"}</td>
                             <td className="p-2">{apt.date}</td>
                             <td className="p-2">{apt.time}</td>
-                            <td className="p-2 text-xs text-muted-foreground">{apt.notes || "-"}</td>
+                            <td className="p-2 text-xs text-muted-foreground">
+                              {apt.notes || "-"}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
+
                   <button
                     onClick={handleAppointmentClick}
                     className="bg-gradient-hero text-white px-4 py-2 rounded-lg"
@@ -196,7 +168,6 @@ const Dashboard: React.FC = () => {
               )}
             </CardContent>
           </Card>
-
         </motion.div>
       </div>
 
