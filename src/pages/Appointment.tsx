@@ -16,7 +16,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 
-const API_BASE = "http://localhost:5002";
+const API_BASE = "http://127.0.0.1:5002";
 
 const Appointment = () => {
   const { toast } = useToast();
@@ -56,7 +56,7 @@ const Appointment = () => {
       email: user?.email || "",
       phone: user?.phone || "",
     }));
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate, user]);
 
   useEffect(() => {
     const state = (location as any).state;
@@ -126,17 +126,18 @@ const Appointment = () => {
     try {
       const response = await fetch(`${API_BASE}/api/appointments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(formData),
       });
 
-      const responseData = await response.json();
-
       if (!response.ok) {
-        throw new Error(
-          responseData.message || "Failed to book appointment"
-        );
+        const errorText = await response.text();
+        throw new Error(errorText || "Server error");
       }
+
+      const data = await response.json();
 
       toast({
         title: "Appointment Booked!",
@@ -146,12 +147,11 @@ const Appointment = () => {
 
       navigate("/dashboard");
     } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : "Unknown error occurred";
+      console.error("Booking error:", error);
 
       toast({
         title: "Error",
-        description: errorMsg,
+        description: "Failed to connect to backend server.",
         variant: "destructive",
       });
     } finally {
