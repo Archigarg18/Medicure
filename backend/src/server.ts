@@ -5,6 +5,11 @@ import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import contactRouter from "../routes/contact.js";
 import appointmentsRouter from "../routes/appointments.js";
+import userRoutes from "./routes/userRoutes.js";
+import doctorRoutes from "./routes/doctorRoutes.js";
+import ambulanceRoutes from "./routes/ambulanceRoutes.js";
+import bloodRoutes from "./routes/bloodRoutes.js";
+import medicineRoutes from "./routes/medicineRoutes.js";
 
 dotenv.config();
 
@@ -41,6 +46,11 @@ app.get("/health", (req: Request, res: Response) => {
 
 app.use("/api/contact", contactRouter);
 app.use("/api/appointments", appointmentsRouter);
+app.use("/api/users", userRoutes);
+app.use("/api/doctors", doctorRoutes);
+app.use("/api/ambulances", ambulanceRoutes);
+app.use("/api/blood", bloodRoutes);
+app.use("/api/medicines", medicineRoutes);
 
 // 404
 app.use((req: Request, res: Response) => {
