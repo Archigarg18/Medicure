@@ -33,16 +33,15 @@ const Appointment = () => {
     phone: "",
     department: "",
     doctor: "",
+    doctorId: "",
     date: "",
     time: "",
     notes: "",
   });
 
+  const [allDoctors, setAllDoctors] = useState<any[]>([]);
   const [availableDoctors, setAvailableDoctors] = useState<any[]>([]);
-
-  const departmentOptions = Array.from(
-    new Set(allDoctors.map((d) => d.specialty))
-  ).sort();
+  const [departmentOptions, setDepartmentOptions] = useState<string[]>([]);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -56,24 +55,46 @@ const Appointment = () => {
       email: user?.email || "",
       phone: user?.phone || "",
     }));
-  }, [isLoggedIn, navigate, user]);
+
+    // Fetch doctors from backend
+    const fetchDoctors = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/doctors`);
+        const data = await res.json();
+        if (data.success) {
+           const docs = data.data.map((doc: any) => ({
+             id: doc.id,
+             name: doc.user.name,
+             specialty: doc.specialty
+           }));
+           setAllDoctors(docs);
+           setDepartmentOptions(Array.from(new Set(docs.map((d: any) => d.specialty))).sort() as string[]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch doctors", err);
+      }
+    };
+    fetchDoctors();
+  }, [isLoggedIn, navigate, user?.name, user?.email, user?.phone]);
 
   useEffect(() => {
     const state = (location as any).state;
 
-    if (state) {
-      const { doctor, department } = state as {
+    if (state && allDoctors.length > 0) {
+      const { doctor, doctorId, department } = state as {
         doctor?: string;
+        doctorId?: string;
         department?: string;
       };
 
       setFormData((prev) => ({
         ...prev,
         doctor: doctor || prev.doctor,
+        doctorId: doctorId || prev.doctorId,
         department: department || prev.department,
       }));
     }
-  }, [location]);
+  }, [location, allDoctors]);
 
   useEffect(() => {
     if (!formData.department) {
@@ -91,9 +112,10 @@ const Appointment = () => {
       setFormData((prev) => ({
         ...prev,
         doctor: matches[0].name,
+        doctorId: matches[0].id,
       }));
     }
-  }, [formData.department]);
+  }, [formData.department, allDoctors]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -104,6 +126,11 @@ const Appointment = () => {
     });
   };
 
+  const handleDoctorChange = (value: string) => {
+    const selectedDoc = availableDoctors.find(d => d.name === value);
+    setFormData({ ...formData, doctor: value, doctorId: selectedDoc?.id || "" });
+  };
+
   const handleSubmit = async () => {
     if (
       !formData.name ||
@@ -111,7 +138,8 @@ const Appointment = () => {
       !formData.phone ||
       !formData.department ||
       !formData.date ||
-      !formData.time
+      !formData.time ||
+      !formData.doctorId
     ) {
       toast({
         title: "Missing Fields",
@@ -124,12 +152,19 @@ const Appointment = () => {
     setLoading(true);
 
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE}/api/appointments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          doctorId: formData.doctorId,
+          date: formData.date,
+          time: formData.time,
+          notes: formData.notes
+        }),
       });
 
       if (!response.ok) {
@@ -208,9 +243,7 @@ const Appointment = () => {
 
               {availableDoctors.length > 0 ? (
                 <Select
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, doctor: value })
-                  }
+                  onValueChange={handleDoctorChange}
                   value={formData.doctor}
                 >
                   <SelectTrigger>

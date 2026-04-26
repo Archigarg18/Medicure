@@ -26,10 +26,14 @@ const Dashboard: React.FC = () => {
   // ✅ FIXED FETCH (using query parameter + correct port)
   useEffect(() => {
     if (user?.email) {
+      const token = localStorage.getItem("token");
       fetch(
-        `${API_BASE}/api/appointments?email=${encodeURIComponent(
-          user.email
-        )}`
+        `${API_BASE}/api/appointments`,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        }
       )
         .then((res) => res.json())
         .then((data) => {

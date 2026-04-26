@@ -199,3 +199,54 @@ export const deleteDoctor = async (req: Request, res: Response) => {
     });
   }
 };
+
+// Get logged-in doctor's appointments
+export const getMyAppointments = async (req: Request, res: Response) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ success: false, message: "Not authenticated" });
+    }
+
+    const doctorProfile = await prisma.doctor.findUnique({ where: { userId: req.userId } });
+    if (!doctorProfile) {
+       return res.status(404).json({ success: false, message: "Doctor profile not found" });
+    }
+
+    const appointments = await prisma.appointment.findMany({
+      where: { doctorId: doctorProfile.id },
+      include: {
+        user: { select: { id: true, name: true, email: true, phone: true } }
+      },
+      orderBy: { appointmentDate: "asc" }
+    });
+
+    res.json({ success: true, data: appointments });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Update logged-in doctor's available slots
+export const updateAvailableSlots = async (req: Request, res: Response) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ success: false, message: "Not authenticated" });
+    }
+    
+    const { availableSlots } = req.body; // Expecting an array of strings like ["Monday 10:00 AM - 12:00 PM"]
+
+    const doctorProfile = await prisma.doctor.findUnique({ where: { userId: req.userId } });
+    if (!doctorProfile) {
+       return res.status(404).json({ success: false, message: "Doctor profile not found" });
+    }
+
+    const updatedDoctor = await prisma.doctor.update({
+      where: { id: doctorProfile.id },
+      data: { availableSlots }
+    });
+
+    res.json({ success: true, message: "Slots updated successfully", data: updatedDoctor.availableSlots });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

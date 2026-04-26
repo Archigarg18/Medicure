@@ -17,6 +17,7 @@ model User {
   password      String
   name          String
   phone         String?
+  profilePic    String?
   role          String    @default("user") // user, doctor, admin
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -37,6 +38,7 @@ model Doctor {
   bio           String?
   consultationFee Float
   availableSlots String[]  // JSON array of available time slots
+  status        String    @default("pending") // pending, approved, rejected
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

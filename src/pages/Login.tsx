@@ -8,36 +8,43 @@ const Login: React.FC = () => {
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
 
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    if (!users.length) {
-      alert("No account found. Please Sign Up first.");
-      return;
-    }
+    try {
+      const res = await fetch("http://localhost:5002/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const parsedUser = users.find((u: any) => u.email === email);
-    if (!parsedUser) {
-      alert("No account with that email. Please Sign Up.");
-      return;
-    }
+      const data = await res.json();
 
-    // ✅ Check credentials
-    if (password === parsedUser.password) {
-      // ✅ Store login state
-      localStorage.setItem("isLoggedIn", "true");
-
-      // ✅ Store full logged in user separately for dashboard
-      localStorage.setItem(
-        "loggedUser",
-        JSON.stringify(parsedUser)
-      );
-
-      navigate("/dashboard");
-    } else {
-      alert("Invalid Credentials");
+      if (res.ok) {
+        // ✅ Store login state and token
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userRole", data.user.role);
+        localStorage.setItem("userName", data.user.name);
+        localStorage.setItem("userEmail", data.user.email);
+        localStorage.setItem("userPic", data.user.profilePic || "");
+        localStorage.setItem("loggedUser", JSON.stringify(data.user));
+        
+        // Handle redirection based on role
+        if (data.user.role === "doctor") {
+          navigate("/doctor/dashboard");
+        } else {
+          // Patient or normal user
+          navigate("/");
+        }
+      } else {
+        setError(data.message || "Invalid Credentials");
+      }
+    } catch (err) {
+      setError("Something went wrong during login.");
     }
   };
 
@@ -55,6 +62,8 @@ const Login: React.FC = () => {
             Login to access your dashboard
           </p>
 
+          {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm text-center">{error}</div>}
+
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Email */}
             <div>
@@ -66,7 +75,7 @@ const Login: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -80,14 +89,14 @@ const Login: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+              className="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition font-medium"
             >
               Login
             </button>
@@ -98,7 +107,7 @@ const Login: React.FC = () => {
             Don’t have an account?{" "}
             <Link
               to="/signup"
-              className="text-green-600 font-medium"
+              className="text-primary font-medium hover:underline"
             >
               Sign Up
             </Link>

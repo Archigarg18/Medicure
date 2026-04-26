@@ -5,18 +5,24 @@ import {
   createDoctor,
   updateDoctor,
   deleteDoctor,
-} from "../controllers/doctorController";
-import { authenticate, authorize } from "../middleware/auth";
+  getMyAppointments,
+  updateAvailableSlots
+} from "../controllers/doctorController.js";
+import { authenticate, authorize } from "../middleware/auth.js";
 import {
   doctorValidation,
   validate,
-} from "../middleware/validation";
+} from "../middleware/validation.js";
 
 const router = express.Router();
 
 // Public routes
 router.get("/", getDoctors);
 router.get("/:id", getDoctor);
+
+// Protected routes (Doctor only)
+router.get("/me/appointments", authenticate, authorize("doctor"), getMyAppointments);
+router.put("/me/slots", authenticate, authorize("doctor"), updateAvailableSlots);
 
 // Protected routes (admin only)
 router.post(

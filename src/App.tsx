@@ -26,6 +26,9 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 
+// Doctor Pages
+import DoctorDashboard from "./pages/doctor/DoctorDashboard";
+
 const queryClient = new QueryClient();
 
 // ✅ Protected Route Component
@@ -33,6 +36,18 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+// ✅ Doctor Protected Route
+const DoctorRoute = ({ children }: { children: JSX.Element }) => {
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const role = localStorage.getItem("userRole");
+
+  if (!isLoggedIn || role !== "doctor") {
     return <Navigate to="/login" replace />;
   }
 
@@ -60,6 +75,16 @@ const App = () => (
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
+            }
+          />
+
+          {/* 🩺 Doctor Routes */}
+          <Route
+            path="/doctor/dashboard"
+            element={
+              <DoctorRoute>
+                <DoctorDashboard />
+              </DoctorRoute>
             }
           />
 

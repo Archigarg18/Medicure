@@ -1,12 +1,13 @@
 import PageLayout from "@/components/PageLayout";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Stethoscope, Brain, Bone, Eye, Baby, HeartPulse, Pill, Smile, Star, Clock,
   Zap, Droplet, Microscope, Heart, Ear,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import allDoctors from "@/lib/doctors";
 
 const departments = [
   { id: "cardiology", name: "Cardiology", icon: HeartPulse, color: "bg-medical-coral-light text-medical-coral" },
@@ -29,15 +30,41 @@ const departments = [
   { id: "ent", name: "ENT", icon: Ear, color: "bg-medical-blue-light text-medical-blue" },
 ];
 
-import { allDoctors } from "@/lib/doctors";
 
 const Doctors = () => {
   const [selectedDept, setSelectedDept] = useState<string | null>(null);
+  const [doctorsList, setDoctorsList] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await fetch("http://localhost:5002/api/doctors");
+        const data = await res.json();
+        if (data.success) {
+           const formatted = data.data.map((doc: any) => ({
+              id: doc.id,
+              name: doc.user.name,
+              specialty: doc.specialty,
+              rating: doc.rating || 5.0,
+              exp: doc.experience || 0,
+              color: "bg-medical-blue-light text-medical-blue", // Default color
+              profilePic: doc.user.profilePic
+           }));
+           setDoctorsList([...formatted, ...allDoctors]);
+        } else {
+           setDoctorsList(allDoctors);
+        }
+      } catch (err) {
+        console.error("Failed to fetch doctors", err);
+        setDoctorsList(allDoctors);
+      }
+    };
+    fetchDoctors();
+  }, []);
 
   const filteredDoctors = selectedDept
-    ? allDoctors.filter((doc) => doc.specialty.toLowerCase() === selectedDept.toLowerCase())
-    : allDoctors;
-
+    ? doctorsList.filter((doc) => doc.specialty.toLowerCase() === selectedDept.toLowerCase())
+    : doctorsList;
 
 return (
     <PageLayout>
@@ -90,20 +117,29 @@ return (
           <div>
             <p className="text-sm text-muted-foreground text-center mb-6">
               {selectedDept
-                ? `Found ${filteredDoctors.length} doctor(s) in ${departments.find((d) => d.id === selectedDept)?.name}`
+                ? `Found ${filteredDoctors.length} doctor(s) in ${departments.find((d) => d.id === selectedDept)?.name || selectedDept}`
                 : `Showing all ${filteredDoctors.length} doctor(s)`}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+              {filteredDoctors.length === 0 && (
+                <div className="col-span-full text-center py-10 text-gray-500">
+                   No doctors found for this specialty.
+                </div>
+              )}
               {filteredDoctors.map((doc, i) => (
                 <motion.div
-                  key={doc.name}
+                  key={doc.id || doc.name}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
                   className="p-6 rounded-xl bg-card shadow-card border border-border/50 flex flex-col items-center text-center"
                 >
-                  <div className={`w-16 h-16 rounded-full ${doc.color} flex items-center justify-center mb-4`}>
-                    <Stethoscope className="w-8 h-8" />
+                  <div className={`w-16 h-16 rounded-full ${doc.profilePic ? 'bg-transparent' : doc.color} flex items-center justify-center mb-4 overflow-hidden`}>
+                    {doc.profilePic ? (
+                       <img src={doc.profilePic} alt={doc.name} className="w-full h-full object-cover" />
+                    ) : (
+                       <Stethoscope className="w-8 h-8" />
+                    )}
                   </div>
                   <h3 className="font-display font-semibold text-foreground">{doc.name}</h3>
                   <p className="text-sm text-muted-foreground mb-2">{doc.specialty}</p>
@@ -111,7 +147,7 @@ return (
                     <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-medical-amber" />{doc.rating}</span>
                     <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{doc.exp}y exp</span>
                   </div>
-                  <Link to="/appointment" state={{ doctor: doc.name, department: doc.specialty }} className="w-full">
+                  <Link to="/appointment" state={{ doctor: doc.name, doctorId: doc.id, department: doc.specialty }} className="w-full">
                     <Button size="sm" className="w-full bg-gradient-hero text-primary-foreground hover:opacity-90 font-semibold">
                       Book Appointment
                     </Button>
