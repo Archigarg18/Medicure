@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { safeLocalStorageGet, safeLocalStorageRemove } from "@/lib/browser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -44,7 +45,7 @@ const DoctorDashboard = () => {
 
   const fetchAppointments = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = safeLocalStorageGet("token");
       const res = await fetch("http://localhost:5002/api/doctors/me/appointments", {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -79,15 +80,17 @@ const DoctorDashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userRole");
+    safeLocalStorageRemove("token");
+    safeLocalStorageRemove("isLoggedIn");
+    safeLocalStorageRemove("userRole");
     navigate("/doctor/login");
   };
 
-  const userName = localStorage.getItem("userName") || "Doctor";
-  const userEmail = localStorage.getItem("userEmail") || "";
-  const userPic = localStorage.getItem("userPic") || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&auto=format&fit=crop&q=60";
+  const userName = safeLocalStorageGet("userName") || "Doctor";
+  const userEmail = safeLocalStorageGet("userEmail") || "";
+  const userPic =
+    safeLocalStorageGet("userPic") ||
+    "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&auto=format&fit=crop&q=60";
 
   return (
     <div className="flex h-screen bg-[#F5F6FA] font-sans overflow-hidden">

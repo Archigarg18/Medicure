@@ -1,5 +1,5 @@
 import { createRoot, hydrateRoot } from "react-dom/client";
-import App from "./App.tsx";
+import App from "./App";
 import "./index.css";
 
 const container = document.getElementById("root");
@@ -8,26 +8,19 @@ if (!container) {
   throw new Error("Root element not found");
 }
 
-// Check if we're hydrating from SSR
-const isSSR =
-  window.__INITIAL_STATE__ !== undefined ||
-  (container.innerHTML && container.innerHTML.trim().length > 0);
+const shouldHydrate = container.innerHTML.trim().length > 0;
 
-if (isSSR) {
-  // Hydrate from SSR-rendered HTML
+if (shouldHydrate) {
   hydrateRoot(container, <App />);
-  console.log("🔄 Hydrating from SSR");
+  console.log("🔄 Hydrating from server-rendered HTML");
 } else {
-  // Normal client-side rendering
   createRoot(container).render(<App />);
-  console.log("🚀 Client-side rendering");
+  console.log("🚀 Client-side render");
 }
 
-// Declare global types for SSR
 declare global {
   interface Window {
     __INITIAL_STATE__?: any;
     __USER_ID__?: string | null;
   }
 }
-

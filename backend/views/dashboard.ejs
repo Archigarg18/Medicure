@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Heal Home Net</title>
+    <style>
+      body { font-family: Arial, sans-serif; background: #f8fafc; color: #111827; padding: 40px; }
+      .panel { max-width: 520px; margin: 0 auto; background: #ffffff; padding: 28px; border-radius: 16px; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); }
+      h1 { margin-bottom: 8px; font-size: 28px; }
+      p { margin: 8px 0; line-height: 1.6; }
+      .label { color: #6b7280; font-size: 14px; margin-top: 16px; }
+      .button { display: inline-block; margin-top: 22px; padding: 12px 18px; background: #ef4444; color: #ffffff; border-radius: 10px; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <h1>Welcome, <%= user?.name || 'User' %></h1>
+      <p>You are logged in with cookie-based authentication.</p>
+
+      <div class="label">Email</div>
+      <p><%= user?.email || 'Unknown' %></p>
+
+      <div class="label">Role</div>
+      <p><%= user?.role || 'user' %></p>
+
+      <a class="button" href="/auth/logout">Logout</a>
+    </div>
+  </body>
+</html>

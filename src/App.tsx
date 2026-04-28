@@ -9,6 +9,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { StaticRouter } from "react-router-dom/server";
 
 import Index from "./pages/Index";
 import Doctors from "./pages/Doctors";
@@ -33,7 +34,10 @@ const queryClient = new QueryClient();
 
 // ✅ Protected Route Component
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const isLoggedIn =
+    typeof window !== "undefined"
+      ? localStorage.getItem("isLoggedIn")
+      : null;
 
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
@@ -44,8 +48,14 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 
 // ✅ Doctor Protected Route
 const DoctorRoute = ({ children }: { children: JSX.Element }) => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
-  const role = localStorage.getItem("userRole");
+  const isLoggedIn =
+    typeof window !== "undefined"
+      ? localStorage.getItem("isLoggedIn")
+      : null;
+  const role =
+    typeof window !== "undefined"
+      ? localStorage.getItem("userRole")
+      : null;
 
   if (!isLoggedIn || role !== "doctor") {
     return <Navigate to="/login" replace />;
@@ -54,57 +64,67 @@ const DoctorRoute = ({ children }: { children: JSX.Element }) => {
   return children;
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+interface AppProps {
+  ssrLocation?: string;
+}
 
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
+const App = ({ ssrLocation }: AppProps) => {
+  const routes = (
+    <Routes>
+      <Route path="/" element={<Index />} />
 
-          {/* 🔐 Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+      {/* 🔐 Auth Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
 
-          {/* 🔥 Protected Dashboard */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+      {/* 🔥 Protected Dashboard */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
 
-          {/* 🩺 Doctor Routes */}
-          <Route
-            path="/doctor/dashboard"
-            element={
-              <DoctorRoute>
-                <DoctorDashboard />
-              </DoctorRoute>
-            }
-          />
+      {/* 🩺 Doctor Routes */}
+      <Route
+        path="/doctor/dashboard"
+        element={
+          <DoctorRoute>
+            <DoctorDashboard />
+          </DoctorRoute>
+        }
+      />
 
-          {/* Other Routes (Optional: You can protect these later too) */}
-          <Route path="/doctors" element={<Doctors />} />
-          <Route path="/pharmacy" element={<Pharmacy />} />
-          <Route path="/blood-bank" element={<BloodBank />} />
-          <Route path="/ambulance" element={<Ambulance />} />
-          <Route path="/beds" element={<Beds />} />
-          <Route path="/canteen" element={<Canteen />} />
-          <Route path="/period-tracker" element={<PeriodTracker />} />
-          
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/appointment" element={<Appointment />} />
+      {/* Other Routes (Optional: You can protect these later too) */}
+      <Route path="/doctors" element={<Doctors />} />
+      <Route path="/pharmacy" element={<Pharmacy />} />
+      <Route path="/blood-bank" element={<BloodBank />} />
+      <Route path="/ambulance" element={<Ambulance />} />
+      <Route path="/beds" element={<Beds />} />
+      <Route path="/canteen" element={<Canteen />} />
+      <Route path="/period-tracker" element={<PeriodTracker />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/appointment" element={<Appointment />} />
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        {ssrLocation ? (
+          <StaticRouter location={ssrLocation}>{routes}</StaticRouter>
+        ) : (
+          <BrowserRouter>{routes}</BrowserRouter>
+        )}
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

@@ -32,7 +32,7 @@ const Ambulance = () => {
   /* ---------------- LIVE LOCATION UPDATE ---------------- */
 
   useEffect(() => {
-    if (!navigator.geolocation) {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
       setUserArea("Geolocation Not Supported");
       return;
     }

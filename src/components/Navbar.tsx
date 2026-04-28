@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Heart, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { safeLocalStorageGet } from "@/lib/browser";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -20,8 +21,8 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem("loggedUser") || "{}");
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const user = JSON.parse(safeLocalStorageGet("loggedUser") || "{}");
+  const isLoggedIn = safeLocalStorageGet("isLoggedIn");
 
   // ✅ Logout
   const handleLogout = () => {

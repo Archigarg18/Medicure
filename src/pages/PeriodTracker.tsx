@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { safeLocalStorageGet, safeLocalStorageSet } from "@/lib/browser";
 import PageLayout from "@/components/PageLayout";
 import { motion } from "framer-motion";
 
@@ -27,13 +28,13 @@ const PeriodTracker = () => {
   }
 
   // ensure logged in user
-  const user = JSON.parse(localStorage.getItem("loggedUser") || "{}");
+  const user = JSON.parse(safeLocalStorageGet("loggedUser") || "{}");
   useEffect(() => {
     if (!user?.email) {
       // redirect if needed
     }
     // load existing data
-    const data = JSON.parse(localStorage.getItem(`period_${user.email}`) || "null");
+    const data = JSON.parse(safeLocalStorageGet(`period_${user.email}`) || "null");
     if (data) {
       setLastPeriod(data.lastPeriod);
       // cycleLength and lutealLength are constant defaults for now
@@ -65,7 +66,7 @@ const PeriodTracker = () => {
       tips,
     });
 
-    localStorage.setItem(
+    safeLocalStorageSet(
       `period_${user.email}`,
       JSON.stringify({ lastPeriod, cycleLength, lutealLength })
     );

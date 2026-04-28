@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { safeLocalStorageGet } from "@/lib/browser";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
@@ -11,8 +12,8 @@ const API_BASE = "http://localhost:5002";
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
-  const user = JSON.parse(localStorage.getItem("loggedUser") || "{}");
+  const isLoggedIn = safeLocalStorageGet("isLoggedIn");
+  const user = JSON.parse(safeLocalStorageGet("loggedUser") || "{}");
 
   const [upcomingReminder, setUpcomingReminder] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<any[]>([]);

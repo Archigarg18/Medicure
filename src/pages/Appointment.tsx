@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
+import { safeLocalStorageGet } from "@/lib/browser";
 import { motion } from "framer-motion";
 import { Calendar, Loader2 } from "lucide-react";
 import allDoctors from "@/lib/doctors";
@@ -24,8 +25,8 @@ const Appointment = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
 
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
-  const user = JSON.parse(localStorage.getItem("loggedUser") || "{}");
+  const isLoggedIn = safeLocalStorageGet("isLoggedIn");
+  const user = JSON.parse(safeLocalStorageGet("loggedUser") || "{}");
 
   const [formData, setFormData] = useState({
     name: "",
