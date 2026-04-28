@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
-import { useSocket } from "@/hooks/useSocket";
-import { safeLocalStorageGet } from "@/lib/browser";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useSocket } from "../hooks/useSocket";
+import { safeLocalStorageGet } from "../lib/browser";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
 import { Bell } from "lucide-react";
 
 interface Notification {

@@ -1,7 +1,7 @@
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "../components/PageLayout";
 import { motion } from "framer-motion";
 import { Droplets } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../components/ui/button";
 
 const bloodGroups = [
   { group: "A+", available: 15, urgent: false },

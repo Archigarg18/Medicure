@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { safeLocalStorageGet, safeLocalStorageSet } from "@/lib/browser";
-import PageLayout from "@/components/PageLayout";
+import { safeLocalStorageGet, safeLocalStorageSet } from "../lib/browser";
+import PageLayout from "../components/PageLayout";
 import { motion } from "framer-motion";
 
 const PeriodTracker = () => {

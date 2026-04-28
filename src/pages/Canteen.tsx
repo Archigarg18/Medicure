@@ -1,9 +1,9 @@
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "../components/PageLayout";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { UtensilsCrossed, QrCode, CreditCard } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 
 const menuItems = [
   { name: "Vegetable Khichdi", price: "₹80", category: "Light Meal", veg: true },

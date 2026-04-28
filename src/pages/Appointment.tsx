@@ -1,21 +1,21 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import PageLayout from "@/components/PageLayout";
-import { safeLocalStorageGet } from "@/lib/browser";
+import PageLayout from "../components/PageLayout";
+import { safeLocalStorageGet } from "../lib/browser";
 import { motion } from "framer-motion";
 import { Calendar, Loader2 } from "lucide-react";
-import allDoctors from "@/lib/doctors";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import allDoctors from "../lib/doctors";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+} from "../components/ui/select";
+import { Textarea } from "../components/ui/textarea";
+import { useToast } from "../components/ui/use-toast";
 
 const API_BASE = "http://127.0.0.1:5002";
 

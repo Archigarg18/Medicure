@@ -1,13 +1,13 @@
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "../components/PageLayout";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import {
   Stethoscope, Brain, Bone, Eye, Baby, HeartPulse, Pill, Smile, Star, Clock,
   Zap, Droplet, Microscope, Heart, Ear,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../components/ui/button";
 import { Link } from "react-router-dom";
-import allDoctors from "@/lib/doctors";
+import allDoctors from "../lib/doctors";
 
 const departments = [
   { id: "cardiology", name: "Cardiology", icon: HeartPulse, color: "bg-medical-coral-light text-medical-coral" },

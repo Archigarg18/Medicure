@@ -1,6 +1,6 @@
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "../components/PageLayout";
 import { Truck, MapPin, Phone } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../components/ui/button";
 import { useEffect, useState, useRef } from "react";
 
 /* ---------------- 12 Ambulances ---------------- */

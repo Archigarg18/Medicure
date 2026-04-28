@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { safeLocalStorageGet, safeLocalStorageRemove } from "@/lib/browser";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { safeLocalStorageGet, safeLocalStorageRemove } from "../../lib/browser";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { useToast } from "../../hooks/use-toast";
 import { 
   LayoutDashboard, 
   CalendarCheck, 

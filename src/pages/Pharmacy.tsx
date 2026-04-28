@@ -1,9 +1,9 @@
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "../components/PageLayout";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Pill, Search, ShoppingCart, Truck, Syringe } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 
 const medicines = [
   { name: "Paracetamol 500mg", category: "Pain Relief", price: "₹25", stock: true, type: "Tablet" },

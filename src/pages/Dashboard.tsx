@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { safeLocalStorageGet } from "@/lib/browser";
+import { safeLocalStorageGet } from "../lib/browser";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 

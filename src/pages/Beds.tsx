@@ -1,4 +1,4 @@
-import PageLayout from "@/components/PageLayout";
+import PageLayout from "../components/PageLayout";
 import { motion } from "framer-motion";
 import { BedDouble } from "lucide-react";
 

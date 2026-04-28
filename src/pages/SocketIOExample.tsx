@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useSocket } from "@/hooks/useSocket";
-import { Button } from "@/components/ui/button";
-import { safeLocalStorageGet } from "@/lib/browser";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import RealtimeNotifications from "@/components/RealtimeNotifications";
-import RealtimeAppointments from "@/components/RealtimeAppointments";
+import { useSocket } from "../hooks/useSocket";
+import { Button } from "../components/ui/button";
+import { safeLocalStorageGet } from "../lib/browser";
+import { Input } from "../components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import RealtimeNotifications from "../components/RealtimeNotifications";
+import RealtimeAppointments from "../components/RealtimeAppointments";
 
 /**
  * Example page showing Socket.io usage

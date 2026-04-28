@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import socketService from "@/services/socketService";
+import socketService from "../services/socketService";
 
 interface UseSocketOptions {
   userId?: string;
